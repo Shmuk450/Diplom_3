@@ -1,1 +1,0 @@
-{"name": "Открытие и закрытие модального окна ингредиента", "status": "passed", "parameters": [{"name": "driver", "value": "'firefox'"}], "start": 1761789713883, "stop": 1761789741065, "uuid": "8878b38f-d4c3-45c7-b105-ee0df7c6d181", "testCaseId": "7681a31cb624b810391d2a2bb855bfbe", "fullName": "tests.test_constructor.TestConstructor#test_open_and_close_ingredient_modal"}

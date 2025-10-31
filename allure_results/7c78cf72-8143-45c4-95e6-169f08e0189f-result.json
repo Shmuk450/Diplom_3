@@ -1,1 +1,0 @@
-{"name": "Проверка перехода по кнопке 'Лента заказов'", "status": "skipped", "parameters": [{"name": "driver", "value": "'firefox'"}], "start": 1761790159393, "stop": 1761790159393, "uuid": "051599b6-d494-4227-96cc-1d4c5d68d82d", "testCaseId": "b1b04ac354e980f1fc2b8686c0f85cf1", "fullName": "tests.test_constructor.TestConstructor#test_go_to_feed"}

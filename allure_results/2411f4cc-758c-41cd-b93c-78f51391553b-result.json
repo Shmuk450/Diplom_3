@@ -1,1 +1,0 @@
-{"name": "Проверка перехода по кнопке 'Конструктор'", "status": "skipped", "start": 1761746573070, "stop": 1761746573070, "uuid": "2e64d881-04ee-4c1b-98b0-039239c81116", "testCaseId": "664d870d751dcd88409fb871dc3945bc", "fullName": "tests.test_constructor.TestConstructor#test_go_to_constructor"}
