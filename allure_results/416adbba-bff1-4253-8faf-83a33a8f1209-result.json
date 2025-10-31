@@ -1,0 +1,1 @@
+{"name": "При добавлении ингредиента в заказ счётчик увеличивается", "status": "passed", "parameters": [{"name": "driver", "value": "'chrome'"}], "start": 1761792437919, "stop": 1761792730357, "uuid": "8f714efe-ae87-4509-bff4-6157a577f121", "testCaseId": "1057513598a2c29040a7b6067dffb296", "fullName": "tests.test_constructor.TestConstructor#test_ingredient_increases_counter"}

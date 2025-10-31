@@ -1,0 +1,1 @@
+{"name": "Total orders count increases after new order creation", "status": "passed", "parameters": [{"name": "driver", "value": "'chrome'"}], "start": 1761804221059, "stop": 1761804230526, "uuid": "b827a054-3264-431f-a939-60fb2f4c3b65", "testCaseId": "b5bad347c64a876b3e58330752e0b81d", "fullName": "tests.test_feed_counters.TestFeedCounters#test_completed_all_time_increases"}

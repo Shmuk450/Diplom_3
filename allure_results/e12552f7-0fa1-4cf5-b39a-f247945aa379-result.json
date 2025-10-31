@@ -1,0 +1,1 @@
+{"name": "Ingredient details modal closes when clicking the close button", "status": "skipped", "parameters": [{"name": "driver", "value": "'chrome'"}], "start": 1761803679524, "stop": 1761803679524, "uuid": "69f81565-c62d-410b-83f6-f18586e7e3af", "testCaseId": "c71bd3251162ca99461a216a910cfa21", "fullName": "tests.test_constructor.TestConstructor#test_close_modal_by_clicking_x"}

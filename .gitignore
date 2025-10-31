@@ -1,0 +1,15 @@
+# виртуальное окружение
+venv/
+.env
+
+# кеши
+_pycache_/
+.pytest_cache/
+.allure/
+allure-results/
+# служебные файлы
+.idea/
+.vscode/
+.DS_Store
+
+test_data/credentials.py
