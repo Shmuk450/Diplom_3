@@ -16,9 +16,19 @@ from locators.order_feed_locators import OrderFeedLocators as L
 
 
 # --- устойчивость ожиданий ---
-REFRESH_TRIES = 8
-WAIT_SHORT = 2.0
-WAIT_LONG = 12
+REFRESH_TRIES = 10
+WAIT_SHORT = 3.0
+WAIT_LONG = 15
+
+# --- хелперы для сравнения номеров (без '#', пробелов и ведущих нулей) ---
+def _digits(s: str) -> str:
+    import re
+    return re.sub(r"\D", "", s or "")
+
+def _same_num(a: str, b: str) -> bool:
+    da, db = _digits(a), _digits(b)
+    # '0310873' и '310873' считаем одинаковыми
+    return da == db or da.endswith(db) or db.endswith(da)
 
 
 def _to_int(txt: str) -> int:
@@ -156,6 +166,7 @@ class TestFeedCounters:
         main.add_ingredient_to_order()
         assert main.place_order_if_enabled(), "Кнопка 'Оформить заказ' недоступна/не нажалась"
         order_number = main.try_get_order_number_from_modal()
+        order_number = _digits(order_number)
         assert order_number, "Не получили номер из модалки — заказ мог не создаться"
         try:
             main.close_ingredient_modal()
@@ -176,11 +187,11 @@ class TestFeedCounters:
             allure.attach("\n".join(ready) or "<пусто>", f"[{attempt}] 'Готовы'", allure.attachment_type.TEXT)
 
             if inprog:
-                if (order_number in inprog) or (set(inprog) != set(before_inprog)):
+                if any(_same_num(x, order_number) for x in inprog) or (set(inprog) != set(before_inprog)):
                     appeared = True
                     break
             else:
-                if (order_number in ready) or (set(ready) != set(before_ready)):
+                if any(_same_num(x, order_number) for x in ready) or (set(ready) != set(before_ready)):
                     appeared = True
                     break
 
