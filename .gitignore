@@ -15,7 +15,6 @@ htmlcov/
 
 # Allure / артефакты
 allure-results/
-allure_results/
 artifacts/
 
 # IDE / ОС
