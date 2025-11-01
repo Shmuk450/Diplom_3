@@ -20,6 +20,11 @@ class BasePage:
         self._driver = driver
         self.wait = WebDriverWait(driver, timeout, poll_frequency=DEFAULT_POLL)
 
+    @property
+    def current_url(self) -> str:
+        """Возвращает текущий URL страницы."""
+        return self._driver.current_url
+
     # ---------- navigation ----------
     def open(self, url: str) -> "BasePage":
         self._driver.get(url)

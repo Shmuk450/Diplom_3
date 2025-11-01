@@ -33,6 +33,8 @@ class MainPageLocators:
     INGREDIENT_MODAL_CLOSE = (By.XPATH, "//section[contains(@class,'Modal')]//button[contains(@class,'close') or @aria-label='Закрыть']")
     MODAL_OVERLAY          = (By.XPATH, "//div[contains(@class,'Modal_modal_overlay')]")
     MODAL_ADD_BUTTON       = (By.XPATH, "//section[contains(@class,'Modal')]//button[contains(normalize-space(.),'Добавить')]")
+    # 🔹 Номер заказа в модалке
+    MODAL_ORDER_NUMBER     = (By.XPATH, "//section[contains(@class,'Modal')]//*[contains(@class,'text_type_digits-large')]")
 
     # Конструктор/оформление
     CONSTRUCTOR_AREA = (By.XPATH, "//section[contains(@class,'BurgerConstructor')]")
