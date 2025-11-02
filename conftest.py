@@ -2,6 +2,7 @@ import os
 import time
 import pytest
 from contextlib import suppress
+from importlib import import_module, util  # ← добавили
 
 from helpers.browser_factory import make_chrome, make_firefox
 from pages.login_page import LoginPage
@@ -21,13 +22,12 @@ def driver(request):
 
 
 # ---------- креды: файл -> ENV ----------
-try:
-    from test_data.credentials import (
-        STELLAR_EMAIL as _FILE_EMAIL,
-        STELLAR_PASSWORD as _FILE_PASSWORD,
-    )
-except ImportError:
-    _FILE_EMAIL = _FILE_PASSWORD = None
+# было try/except ImportError — заменила на проверку наличия модуля без исключений
+_FILE_EMAIL = _FILE_PASSWORD = None
+if util.find_spec("test_data.credentials") is not None:
+    creds = import_module("test_data.credentials")
+    _FILE_EMAIL = getattr(creds, "STELLAR_EMAIL", None)
+    _FILE_PASSWORD = getattr(creds, "STELLAR_PASSWORD", None)
 
 
 @pytest.fixture
@@ -68,7 +68,6 @@ def pytest_runtest_makereport(item, call):
 
     os.makedirs("artifacts", exist_ok=True)
 
-    # без try/except — используем suppress
     with suppress(Exception):
         drv.save_screenshot(f"artifacts/{name}.png")
     with suppress(Exception):

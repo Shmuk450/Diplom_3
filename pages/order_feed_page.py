@@ -1,41 +1,42 @@
+# pages/order_feed_page.py
 from __future__ import annotations
+
 import re
 import allure
+
 from pages.base_page import BasePage
 from locators.order_feed_locators import OrderFeedLocators as L
 
 
 def _to_int_safe(txt: str) -> int:
+    """Достаёт число из строки (любой мусор отбрасывается)."""
     return int(re.sub(r"\D", "", txt or "") or 0)
 
 
 class OrderFeedPage(BasePage):
+    """Страница 'Лента заказов'."""
 
     @allure.step("Открыть ленту заказов")
     def open_feed(self, base_url: str) -> "OrderFeedPage":
-        self.open(f"{base_url}feed")
+        # на случай если base_url без завершающего '/'
+        self.open(base_url.rstrip("/") + "/feed")
         return self
 
     @allure.step("Дождаться загрузки ленты заказов")
     def wait_loaded(self) -> "OrderFeedPage":
-        # ждём любую опорную штуку ленты (через встроенные методы BasePage)
-        try:
-            self.wait_visible(L.HEADER_IN_PROGRESS)
-        except Exception:
-            try:
-                self.wait_visible(L.TOTAL_ALL_TIME)
-            except Exception:
-                self.wait_visible(L.TOTAL_TODAY)
+        # ждём, пока станет видим хотя бы один из «опорных» блоков ленты
+        self.wait_any_visible(
+            L.HEADER_IN_PROGRESS,
+            L.TOTAL_ALL_TIME,
+            L.TOTAL_TODAY,
+        )
         return self
 
     @allure.step("Прокрутить к счётчикам заказов")
     def scroll_to_counters(self) -> "OrderFeedPage":
-        # прокручиваем к одному из заголовков, чтобы ленивый рендер дорисовал цифры
-        try:
-            el = self.wait_visible(L.TOTAL_ALL_TIME)
-        except Exception:
-            el = self.wait_visible(L.HEADER_IN_PROGRESS)
-        self.scroll_into_view(el)
+        # если виден блок с общим числом — скроллим к нему, иначе к «В работе»
+        target = L.TOTAL_ALL_TIME if self.is_visible(L.TOTAL_ALL_TIME) else L.HEADER_IN_PROGRESS
+        self.scroll_into_view(target)  # передаём ЛОКАТОР (не элемент)
         return self
 
     @allure.step("Получить общее количество заказов за всё время")

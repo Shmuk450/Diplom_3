@@ -1,65 +1,31 @@
 # pages/login_page.py
 from __future__ import annotations
 import allure
-from selenium.webdriver.common.by import By
+
 from pages.base_page import BasePage
-
-
-class LoginLocators:
-    LOGIN_HEADER = (By.XPATH, "//h2[normalize-space()='Вход']")
-    EMAIL_INPUT = (
-        By.XPATH,
-        "//label[contains(normalize-space(),'Email')]/following-sibling::input"
-        " | //input[@type='email' or @name='email']"
-    )
-    PASS_INPUT = (
-        By.XPATH,
-        "//label[contains(normalize-space(),'Пароль')]/following-sibling::input"
-        " | //input[@type='password']"
-    )
-    SUBMIT_BTN = (
-        By.XPATH,
-        "//button[normalize-space()='Войти' or .//p[normalize-space()='Войти']]"
-    )
-    ANY_MAIN_HEADER = (By.XPATH, "//main")
+from locators.login_page_locators import LoginPageLocators as L
 
 
 class LoginPage(BasePage):
 
     @allure.step("Открыть страницу логина")
     def open_login(self, base_url: str) -> "LoginPage":
-        self.open(f"{base_url}login")
-        self.wait_visible(LoginLocators.LOGIN_HEADER)
+        self.open(base_url.rstrip("/") + "/login")
+        self.wait_visible(L.LOGIN_HEADER)
         return self
 
     @allure.step("Заполнить логин/пароль и отправить форму (email={email})")
     def fill_credentials_and_submit(self, email: str, password: str) -> "LoginPage":
-        email_el = self.wait_visible(LoginLocators.EMAIL_INPUT)
-        email_el.clear()
-        email_el.send_keys(email)
-
-        pass_el = self.wait_visible(LoginLocators.PASS_INPUT)
-        pass_el.clear()
-        pass_el.send_keys(password)
-
-        try:
-            self.wait_clickable(LoginLocators.SUBMIT_BTN).click()
-        except Exception:
-            # запасной JS-клик, если кнопку перекрыл слой
-            btn = self.find(LoginLocators.SUBMIT_BTN)
-            self.js_click(btn)
+        self.type(L.EMAIL_INPUT, email)     # BasePage.type -> wait_visible + clear + send_keys
+        self.type(L.PASS_INPUT, password)
+        self.click(L.SUBMIT_BTN)            # BasePage.click -> safe_click с fallback JS-кликом
         return self
 
     @allure.step("Дождаться авторизации пользователя")
-    def wait_logged_in(self, base_url: str) -> "LoginPage":
-        """
-        Ждём, пока кнопка 'Войти' исчезнет, а основная страница загрузится.
-        """
-        # проверяем исчезновение кнопки и наличие основного контента
-        self.wait_gone(LoginLocators.SUBMIT_BTN)
-        self.wait_visible(LoginLocators.ANY_MAIN_HEADER)
-        # опционально: убедимся, что URL изменился
-        assert not self.current_url.endswith("login"), "URL не изменился — авторизация не выполнена"
+    def wait_logged_in(self) -> "LoginPage":
+        self.wait_gone(L.SUBMIT_BTN)        # кнопка «Войти» исчезает
+        self.wait_visible(L.ANY_MAIN_HEADER)
+        # без assert в Page — тесты сами проверят состояние при необходимости
         return self
 
     @allure.step("Авторизоваться в приложении (email={email})")
@@ -67,5 +33,5 @@ class LoginPage(BasePage):
         return (
             self.open_login(base_url)
                 .fill_credentials_and_submit(email, password)
-                .wait_logged_in(base_url)
+                .wait_logged_in()
         )
