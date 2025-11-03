@@ -1,0 +1,26 @@
+# Python
+_pycache_/
+**/_pycache_/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+
+# Pytest / coverage
+.pytest_cache/
+.cache/
+.coverage
+htmlcov/
+
+# Allure / артефакты
+allure-results/
+artifacts/
+
+# IDE / ОС
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

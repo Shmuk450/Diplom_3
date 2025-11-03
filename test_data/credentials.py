@@ -1,0 +1,2 @@
+STELLAR_EMAIL = "Diplom2025@gmail.com"
+STELLAR_PASSWORD = "Diplom2025"
