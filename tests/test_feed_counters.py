@@ -3,7 +3,11 @@ import pytest
 
 from pages.main_page import MainPage
 from pages.order_feed_page import OrderFeedPage
-from locators.order_feed_locators import OrderFeedLocators as L
+from helpers.feed_utils import (
+    get_in_progress_numbers,
+    get_ready_numbers,
+    assert_order_appears,
+)
 from test_data.config import BASE_URL
 
 
@@ -30,15 +34,12 @@ class TestFeedCounters:
         assert main.try_get_order_number_from_modal(), "Не получили номер из модалки — заказ мог не создаться"
         main.close_ingredient_modal()
 
-        # 3) ждём рост счётчика (через Page Object)
-        feed.open_feed(BASE_URL).wait_loaded().scroll_to_counters()
-        feed.wait_until(
-            lambda: feed.total_today() > before_today,
-            timeout=20,
-            message=f"'Выполнено за сегодня' не вырос за 20 c (было {before_today})",
-        )
-        after_today = feed.total_today()
-        assert after_today > before_today, f"'За сегодня' не вырос: было {before_today}, стало {after_today}"
+        # 3) проверяем рост счётчика (ожидание инкапсулировано в Page)
+        feed.open_feed(BASE_URL).wait_loaded()
+        increased = feed.today_counter_increased(before_today, timeout=20)
+
+        # финальная проверка
+        assert increased, f"'За сегодня' не вырос (было {before_today}, стало {feed.total_today()})"
 
     @allure.title("Рост 'Выполнено за всё время' после оформления заказа (UI)")
     def test_total_orders_counter(self, driver):
@@ -56,24 +57,20 @@ class TestFeedCounters:
         assert main.try_get_order_number_from_modal(), "Не получили номер из модалки — заказ мог не создаться"
         main.close_ingredient_modal()
 
-        feed.open_feed(BASE_URL).wait_loaded().scroll_to_counters()
-        feed.wait_until(
-            lambda: feed.total_all_time() > before_all,
-            timeout=20,
-            message=f"'Выполнено за всё время' не вырос за 20 c (было {before_all})",
-        )
-        after_all = feed.total_all_time()
-        assert after_all > before_all, f"'За всё время' не вырос: было {before_all}, стало {after_all}"
+        feed.open_feed(BASE_URL).wait_loaded()
+        increased = feed.total_counter_increased(before_all, timeout=20)
+
+        # финальная проверка
+        assert increased, f"'За всё время' не вырос (было {before_all}, стало {feed.total_all_time()})"
 
     @allure.title("После оформления номер появляется в ленте (в 'В работе' или в 'Готовы')")
     def test_new_order_appears_in_work_list(self, driver):
+        # 1) открыли ленту и сняли 'до' через helpers (никаких циклов в тесте)
         feed = OrderFeedPage(driver).open_feed(BASE_URL).wait_loaded()
+        before_inprog = get_in_progress_numbers(feed)
+        before_ready = get_ready_numbers(feed)
 
-        # снимем 'до'
-        before_inprog = {el.text.strip() for el in feed.finds(L.IN_PROGRESS_NUMBERS)}
-        before_ready = {el.text.strip() for el in feed.finds(L.ORDERS_READY)}
-
-        # оформляем заказ
+        # 2) оформили заказ и получили номер
         main = MainPage(driver).open(BASE_URL)
         main.add_ingredient_to_order()
         assert main.place_order_if_enabled(), "Кнопка 'Оформить заказ' недоступна/не нажалась"
@@ -81,17 +78,15 @@ class TestFeedCounters:
         assert order_number, "Не получили номер из модалки — заказ мог не создаться"
         main.close_ingredient_modal()
 
-        # ждём появления номера (или в 'В работе', или сразу в 'Готовы')
+        # 3) ждём появления номера в ленте через helper (никаких внутренних def в тесте)
         feed.open_feed(BASE_URL).wait_loaded()
-
-        def appears() -> bool:
-            if feed.has_order_in_progress(order_number):
-                return True
-            ready_now = {el.text.strip() for el in feed.finds(L.ORDERS_READY)}
-            return (order_number in ready_now) and (ready_now != before_ready or before_inprog)
-
-        feed.wait_until(
-            appears,
+        appeared = assert_order_appears(
+            feed=feed,
+            order_number=order_number,
+            before_ready=before_ready,
+            before_inprog=before_inprog,
             timeout=25,
-            message=f"Номер заказа {order_number} не появился ни в 'В работе', ни в 'Готовы' за 25 c",
         )
+
+        # финальная проверка
+        assert appeared, f"Номер заказа {order_number} не найден в ленте после ожидания"
