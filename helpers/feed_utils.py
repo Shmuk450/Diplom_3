@@ -1,4 +1,6 @@
 # helpers/feed_utils.py
+from __future__ import annotations
+
 import allure
 from pages.order_feed_page import OrderFeedPage
 
@@ -15,7 +17,7 @@ def get_ready_numbers(feed: OrderFeedPage) -> set[str]:
     return feed.get_ready_numbers()
 
 
-@allure.step("Проверить, что заказ №{order_number} появился в ленте")
+@allure.step("Дождаться и проверить, что заказ №{order_number} появился в ленте")
 def assert_order_appears(
     feed: OrderFeedPage,
     order_number: str,
@@ -24,10 +26,11 @@ def assert_order_appears(
     timeout: int = 25,
 ) -> bool:
     """
-    Ждёт появления номера в ленте заказов и выполняет финальную проверку.
-    Используется в тестах вместо прямой логики ожидания.
+    Инкапсулирует ожидание появления заказа в ленте.
+    Возвращает True, если номер найден в 'В работе' или 'Готовы'.
+    Никаких ассёртов внутри — финальная проверка остаётся в тесте.
     """
-    # Ждём появления через новый метод страницы
+    # ждём появление через Page Object
     appeared = feed.order_appeared(
         order_number=order_number,
         before_ready=before_ready,
@@ -35,12 +38,10 @@ def assert_order_appears(
         timeout=timeout,
     )
 
-    # После ожидания выполняем явную финальную проверку
+    if not appeared:
+        return False
+
+    # финальная сверка после ожидания
     inprog_after = feed.get_in_progress_numbers()
     ready_after = feed.get_ready_numbers()
-
-    assert appeared and (
-        order_number in inprog_after or order_number in ready_after
-    ), f"Номер заказа {order_number} не найден в ленте после ожидания"
-
-    return True
+    return (order_number in inprog_after) or (order_number in ready_after)
